@@ -37,7 +37,7 @@ jobs:
 
       # Passo 6: Upload dos relatórios como artefatos
       - name: Upload reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: newman-reports
           path: |
