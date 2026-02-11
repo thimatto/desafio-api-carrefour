@@ -1,0 +1,45 @@
+name: API Carrefour Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  run-newman-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Passo 1: Clonar o repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Passo 2: Instalar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Passo 3: Instalar Newman
+      - name: Install Newman
+        run: npm install -g newman
+
+      # Passo 4: Rodar teste de Regressão
+      - name: Run Regressao tests
+        run: |
+          newman run API_carrefour.json -e ambiente.json --folder "Regressao" -r html --reporter-html-export regressao-report.html
+
+      # Passo 5: Rodar teste de Rate Limit
+      - name: Run Rate Limit tests
+        run: |
+          newman run API_carrefour.json -e ambiente.json --folder "Rate Limit" --iteration-count 110 -r html --reporter-html-export rate-limit-report.html
+
+      # Passo 6: Upload dos relatórios como artefatos
+      - name: Upload reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: newman-reports
+          path: |
+            regressao-report.html
+            rate-limit-report.html
