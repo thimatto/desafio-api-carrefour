@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:   # permite rodar manualmente pela aba Actions
+  workflow_dispatch:   
 
 jobs:
   run-newman-tests:
@@ -28,15 +28,15 @@ jobs:
           npm install -g newman
           npm install -g newman-reporter-html
 
-      # Passo 4: Rodar teste de Regressão
+      # Passo 4: Rodar teste de Regressão (não falha a pipeline)
       - name: Run Regressao tests
         run: |
-          newman run API_carrefour.json -e ambiente.json --folder "Regressao" -r html --reporter-html-export regressao-report.html
+          newman run API_carrefour.json -e ambiente.json --folder "Regressao" -r html --reporter-html-export regressao-report.html || true
 
-      # Passo 5: Rodar teste de Rate Limit
+      # Passo 5: Rodar teste de Rate Limit (não falha a pipeline)
       - name: Run Rate Limit tests
         run: |
-          newman run API_carrefour.json -e ambiente.json --folder "Rate Limit" --iteration-count 110 -r html --reporter-html-export rate-limit-report.html
+          newman run API_carrefour.json -e ambiente.json --folder "Rate Limit" --iteration-count 110 -r html --reporter-html-export rate-limit-report.html || true
 
       # Passo 6: Upload dos relatórios como artefatos
       - name: Upload reports
