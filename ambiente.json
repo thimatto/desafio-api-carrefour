@@ -1,0 +1,14 @@
+{
+  "id": "5696440-0b8dc0a5-075f-46ed-ba9c-7fb744a83614",
+  "name": "variables",
+  "values": [
+    { "key": "baseUrl",      "value": "https://serverest.dev",      "enabled": true, "type": "default" },
+    { "key": "token",        "value": "{{token}}",        "enabled": true, "type": "default" },
+    { "key": "userId",       "value": "{{userId}}",       "enabled": true, "type": "default" },
+    { "key": "counter",      "value": "{{counter}}",      "enabled": true, "type": "default" },
+    { "key": "requestCount", "value": "{{requestCount}}", "enabled": true, "type": "default" }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2024-02-11T00:00:00.000Z",
+  "_postman_exported_using": "Postman"
+}

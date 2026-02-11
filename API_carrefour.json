@@ -1,0 +1,1235 @@
+{
+  "info": {
+    "_postman_id": "03ae6c98-25fe-44b4-9ee9-6db59ab966f2",
+    "name": "API_carrefour",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "5696440",
+    "_collection_link": "https://go.postman.co/collection/5696440-03ae6c98-25fe-44b4-9ee9-6db59ab966f2?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Rate Limit",
+      "item": [
+        {
+          "name": "GET /Validando Rate Limit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let count = parseInt(pm.environment.get(\"requestCount\"));\r",
+                  "let status = pm.response.code;\r",
+                  "\r",
+                  "// Até 100 deve ser 200\r",
+                  "if (count <= 100) {\r",
+                  "    pm.test(`Requisição ${count} deve retornar 200`, function () {\r",
+                  "        pm.expect(status).to.eql(200);\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  "// Após 101 deve ser 429\r",
+                  "if (count > 100) {\r",
+                  "    pm.test(`Requisição ${count} deve retornar 429`, function () {\r",
+                  "        pm.expect(status).to.eql(429);\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "if (!pm.environment.get(\"requestCount\")) {\r",
+                  "    pm.environment.set(\"requestCount\", 1);\r",
+                  "} else {\r",
+                  "    let count = parseInt(pm.environment.get(\"requestCount\"));\r",
+                  "    pm.environment.set(\"requestCount\", count + 1);\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Regressao",
+      "item": [
+        {
+          "name": "Login",
+          "item": [
+            {
+              "name": "Gera token - Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response retorna message e authorization\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    \r",
+                      "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"authorization\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Armazena token no environment\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    \r",
+                      "    // Salva o token no environment\r",
+                      "    pm.environment.set(\"token\", jsonData.authorization);\r",
+                      "\r",
+                      "    // Valida que o token foi realmente salvo\r",
+                      "    pm.expect(pm.environment.get(\"token\")).to.be.a(\"string\").and.not.empty;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"fulano@qa.com\",\r\n  \"password\": \"teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Cadastro",
+          "item": [
+            {
+              "name": "POST /usuarios - cadastro",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Verifica se o usuário foi criado\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Cadastro realizado com sucesso\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Armazena _id no environment\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    \r",
+                      "    // Salva o _id no environment\r",
+                      "    pm.environment.set(\"userId\", jsonData._id);\r",
+                      "\r",
+                      "    // Valida que o _id foi salvo\r",
+                      "    pm.expect(pm.environment.get(\"userId\")).to.be.a(\"string\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"Thiago Teste\",\r\n  \"email\": \"thiagoqa{{$randomPassword}}@qa.com\",\r\n  \"password\": \"123456\",\r\n  \"administrador\": \"true\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GET /id - validar usuario cadastrado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Resposta contém os campos obrigatórios do usuário\", function () {\r",
+                      "    // verifica que é um objeto\r",
+                      "    pm.expect(jsonData).to.be.an(\"object\");\r",
+                      "\r",
+                      "    // campos existem\r",
+                      "    pm.expect(jsonData).to.have.property(\"nome\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"email\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"password\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"administrador\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"_id\");\r",
+                      "\r",
+                      "    // valida se nao estao vazios\r",
+                      "    pm.expect(jsonData.nome).to.be.a(\"string\").and.not.empty;\r",
+                      "    pm.expect(jsonData.email).to.be.a(\"string\").and.not.empty;\r",
+                      "    pm.expect(jsonData.password).to.be.a(\"string\").and.not.empty;\r",
+                      "    pm.expect(jsonData.administrador).to.be.a(\"string\"); \r",
+                      "    pm.expect(jsonData._id).to.be.a(\"string\").and.not.empty;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Listagem",
+          "item": [
+            {
+              "name": "GET /usuarios",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Valida campos da lista\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"quantidade\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"usuarios\");\r",
+                      "    pm.expect(jsonData.usuarios).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Cada usuário tem os campos esperados\", function () {\r",
+                      "    jsonData.usuarios.forEach((user, index) => {\r",
+                      "        pm.expect(user, \"usuario[\" + index + \"]\").to.have.property(\"nome\");\r",
+                      "        pm.expect(user, \"usuario[\" + index + \"]\").to.have.property(\"email\");\r",
+                      "        pm.expect(user, \"usuario[\" + index + \"]\").to.have.property(\"password\");\r",
+                      "        pm.expect(user, \"usuario[\" + index + \"]\").to.have.property(\"administrador\");\r",
+                      "        pm.expect(user, \"usuario[\" + index + \"]\").to.have.property(\"_id\");\r",
+                      "\r",
+                      "        // Valida tipos básicos\r",
+                      "        pm.expect(user.nome, \"nome deve ser string\").to.be.a(\"string\");\r",
+                      "        pm.expect(user.email, \"email deve ser string\").to.be.a(\"string\");\r",
+                      "        pm.expect(user.password, \"password deve ser string\").to.be.a(\"string\");\r",
+                      "        pm.expect(user.administrador, \"administrador deve ser string\").to.be.a(\"string\");\r",
+                      "        pm.expect(user._id, \"_id deve ser string\").to.be.a(\"string\");\r",
+                      "    });\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Deletar",
+          "item": [
+            {
+              "name": "DELETE /users",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Usuário deletado\", function () {\r",
+                      "    pm.expect(pm.response.json().message)\r",
+                      "      .to.eql(\"Registro excluído com sucesso\");\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Alterar",
+          "item": [
+            {
+              "name": "PUT /cadastro",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Verifica se o usuário foi criado\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Cadastro realizado com sucesso\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Armazena _id no environment\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    \r",
+                      "    // Salva o _id no environment\r",
+                      "    pm.environment.set(\"userId\", jsonData._id);\r",
+                      "\r",
+                      "    // Valida que o _id foi salvo\r",
+                      "    pm.expect(pm.environment.get(\"userId\")).to.be.a(\"string\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"Thiago QA\",\r\n  \"email\": \"thiago{{$randomPassword}}@qa.com\",\r\n  \"password\": \"654321\",\r\n  \"administrador\": \"false\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/00000000000000012",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "00000000000000012"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "PUT /alterar",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Usuário atualizado\", function () {\r",
+                      "    pm.expect(pm.response.json().message)\r",
+                      "      .to.eql(\"Registro alterado com sucesso\");\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "// Salvar em variáveis de collection\r",
+                      "pm.collectionVariables.set(\"usuario_nome\", jsonData.nome);\r",
+                      "pm.collectionVariables.set(\"usuario_email\", jsonData.email);\r",
+                      "pm.collectionVariables.set(\"usuario_password\", jsonData.password);\r",
+                      "pm.collectionVariables.set(\"usuario_administrador\", jsonData.administrador);\r",
+                      "pm.collectionVariables.set(\"usuario_id\", jsonData._id);\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"Thiago Atualizado\",\r\n  \"email\": \"teste{{$randomPassword}}@qa.com\",\r\n  \"password\": \"654321\",\r\n  \"administrador\": \"false\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Valida usuario alterado com sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "// Salva/atualiza variáveis de collection com o retorno atual\r",
+                      "pm.collectionVariables.set(\"usuario_nome\", jsonData.nome);\r",
+                      "pm.collectionVariables.set(\"usuario_email\", jsonData.email);\r",
+                      "pm.collectionVariables.set(\"usuario_password\", jsonData.password);\r",
+                      "pm.collectionVariables.set(\"usuario_administrador\", jsonData.administrador);\r",
+                      "pm.collectionVariables.set(\"usuario_id\", jsonData._id);\r",
+                      "\r",
+                      "// Lê as variáveis de collection\r",
+                      "const usuario_nome = pm.collectionVariables.get(\"usuario_nome\");\r",
+                      "const usuario_email = pm.collectionVariables.get(\"usuario_email\");\r",
+                      "const usuario_password = pm.collectionVariables.get(\"usuario_password\");\r",
+                      "const usuario_administrador = pm.collectionVariables.get(\"usuario_administrador\");\r",
+                      "const usuario_id = pm.collectionVariables.get(\"usuario_id\");\r",
+                      "\r",
+                      "// Testes de conteúdo usando as variáveis \r",
+                      "pm.test(\"Nome retornado bate com variavel de collection\", function () {\r",
+                      "    pm.expect(jsonData.nome).to.eql(usuario_nome);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Email retornado bate com variavel de collection\", function () {\r",
+                      "    pm.expect(jsonData.email).to.eql(usuario_email);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Password retornada bate com variavel de collection\", function () {\r",
+                      "    pm.expect(jsonData.password).to.eql(usuario_password);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Flag administrador bate com variavel de collection\", function () {\r",
+                      "    pm.expect(jsonData.administrador).to.eql(usuario_administrador);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"ID do usuário bate com variavel de collection\", function () {\r",
+                      "    pm.expect(jsonData._id).to.eql(usuario_id);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Negativos",
+          "item": [
+            {
+              "name": "Login invalido - email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 401\", function () {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"thiago@qa.com\",\r\n  \"password\": \"teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login invalido - password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 401\", function () {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"fulano@qa.com\",\r\n  \"password\": \"1teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "POST /usuario - ja existe",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Ja existe o email\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Este email já está sendo usado\");\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"Thiago Teste\",\r\n  \"email\": \"thiago@qa12.com\",\r\n  \"password\": \"123456\",\r\n  \"administrador\": \"false\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "POST /token ausente",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"token ausente\",\r\n  \"email\": \"{{$randomPassword}}@qa.com\",\r\n  \"password\": \"123456\",\r\n  \"administrador\": \"true\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "POST /token invalido",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "INVALIDO",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"token ausente\",\r\n  \"email\": \"{{$randomPassword}}@qa.com\",\r\n  \"password\": \"123456\",\r\n  \"administrador\": \"true\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "POST / campos obrigatórios",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400 - campos obrigatórios\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Velida campos obrigatorios e msg de erro\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"nome\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"email\");\r",
+                      " \r",
+                      "    pm.expect(jsonData.nome).to.eql(\"nome é obrigatório\");\r",
+                      "    pm.expect(jsonData.email).to.eql(\"email é obrigatório\");\r",
+                      " \r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  //\"nome\": \"Thiago Teste\",\r\n  //\"email\": \"thiago@qa.com\",\r\n  \"password\": \"123456\",\r\n  \"administrador\": \"true\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GET /Buscar usuário inexistente",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Valida que user nao foi encontrado\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Usuário não encontrado\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/0000000000000000",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "0000000000000000"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "PUT /campos obrigatorios",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400 - campos obrigatórios\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Velida campos obrigatorios e msg de erro\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"nome\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"email\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"password\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"administrador\");\r",
+                      "\r",
+                      "    pm.expect(jsonData.nome).to.eql(\"nome é obrigatório\");\r",
+                      "    pm.expect(jsonData.email).to.eql(\"email é obrigatório\");\r",
+                      "    pm.expect(jsonData.password).to.eql(\"password é obrigatório\");\r",
+                      "    pm.expect(jsonData.administrador).to.eql(\"administrador é obrigatório\");\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  /*\"nome\": \"Thiago Atualizado\",\r\n  \"email\": \"thiago@qa.com\",\r\n  \"password\": \"654321\",\r\n  \"administrador\": \"false\"\r\n  */\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "PUT /Email ja cadastrado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 400 - email já cadastrado\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "\r",
+                      "//nao tem id o put tenta fazer o cadastro\r",
+                      "pm.test(\"Valida que existe o email informado\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Este email já está sendo usado\");\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"nome\": \"Thiago Atualizado\",\r\n  \"email\": \"thiago@qa.com\",\r\n  \"password\": \"654321\",\r\n  \"administrador\": \"false\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/00000000000000012",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "00000000000000012"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Nao existe id para deletar",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Valida que nao existe id na base\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Nenhum registro excluído\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/usuarios/{{userId}}1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "usuarios",
+                    "{{userId}}1"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "usuario_nome",
+      "value": ""
+    },
+    {
+      "key": "usuario_email",
+      "value": ""
+    },
+    {
+      "key": "usuario_password",
+      "value": ""
+    },
+    {
+      "key": "usuario_administrador",
+      "value": ""
+    },
+    {
+      "key": "usuario_id",
+      "value": ""
+    }
+  ]
+}
